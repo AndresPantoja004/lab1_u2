@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ESPE Tasks</title>
+    <link rel="icon" href="/favicon.ico" />
+    <style>
+      body {
+        margin: 0;
+        font-family: 'Segoe UI', sans-serif;
+        background-color: var(--background-color);
+        color: var(--text-color);
+      }
+      main {
+        padding: 1rem;
+        max-width: 1024px;
+        margin: 0 auto;
+      }
+      .container-btn{
+        display: flex;
+        justify-content: end;
+        align-items: center;
+      }
+      hr {
+        border: none;
+        height: 2px;
+        background-color: #2f8155;
+        margin: 0.5rem 0;
+        border-radius: 4px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <sidebar-menu></sidebar-menu>
+    <header-component></header-component>
+
+    <main>
+      <h1 style="color: white;">Mis tareas</h1>
+      <task-tab></task-tab>
+      <hr>
+      <task-view></task-view>
+      <div class="container-btn">
+        <add-task-button></add-task-button>
+        <add-task-modal></add-task-modal>
+      </div>
+    </main>
+
+    <script type="module" src="/src/app.ts"></script>
+  </body>
+</html>

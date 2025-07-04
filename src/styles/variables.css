@@ -1,0 +1,11 @@
+:root {
+  --primary-color: #112b21;       /* Fondo oscuro de cabecera */
+  --accent-color: #2f8155;        /* Verde vibrante para resaltar */
+  --background-color: #112b21;    /* Fondo de secciones */
+  --text-color: #333;             /* Texto principal */
+  --text-light: #fff;             /* Texto sobre fondo oscuro */
+  --card-color: #ffffff;          /* Tarjetas de tarea */
+  --shadow-soft: 0 2px 6px rgba(0, 0, 0, 0.1);
+  --section-title-color: #8ecdb7;
+
+}
