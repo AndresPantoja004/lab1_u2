@@ -19,43 +19,53 @@ export class HeaderComponent extends LitElement {
       font-weight: bold;
     }
 
+    .hamburger {
+      cursor: pointer;
+      display: block;
+    }
+
     .header-right {
-      display: flex;
+      display: none;
       align-items: center;
       gap: 1rem;
     }
 
-    .hamburger {
-      margin-right: 1rem;
-      cursor: pointer;
+    nav-menu,
+    icon-bell,
+    user-avatar {
+      display: none;
     }
 
     @media (min-width: 768px) {
+      .header-right {
+        display: flex;
+      }
+
+      nav-menu,
+      icon-bell,
+      user-avatar {
+        display: block;
+      }
+
       .hamburger {
         display: none;
       }
     }
-
-    icon-bell, user-avatar {
-      cursor: pointer;
-    }
   `;
 
-
-    private _openSidebar() {
+  private _openSidebar() {
     this.dispatchEvent(new CustomEvent('open-sidebar', {
       bubbles: true,
       composed: true
     }));
   }
 
-
   render() {
     return html`
       <header>
         <div class="logo">🧻 ESPE Tasks</div>
+        <div class="hamburger" @click=${this._openSidebar}>☰</div>
         <div class="header-right">
-          <div class="hamburger" @click=${this._openSidebar}>☰</div>
           <nav-menu></nav-menu>
           <icon-bell></icon-bell>
           <user-avatar src="https://cdn-icons-png.flaticon.com/512/4159/4159471.png"></user-avatar>
@@ -63,5 +73,4 @@ export class HeaderComponent extends LitElement {
       </header>
     `;
   }
-
 }

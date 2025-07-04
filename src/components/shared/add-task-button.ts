@@ -41,10 +41,11 @@ export class AddTaskButton extends LitElement {
     `;
   }
 
-  openModal() {
-    const modal = document.querySelector('add-task-modal') as HTMLElement & { open: boolean };
-    if (modal) {
-      modal.open = true;
-    }
+  private openModal() {
+    // Evento que debe ser capturado en task-view para abrir el modal en modo creación
+    this.dispatchEvent(new CustomEvent('open-modal', {
+      bubbles: true,
+      composed: true
+    }));
   }
 }

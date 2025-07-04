@@ -12,12 +12,7 @@ interface Task {
 @customElement('task-section')
 export class TaskSection extends LitElement {
   @property({ type: String }) title: string = '';
-  @property({ type: Array }) tasks!: Task[];
-
-  constructor() {
-    super();
-    this.tasks = [];
-  }
+  @property({ type: Array }) tasks: Task[] = [];
 
   static styles = css`
     .section {
@@ -31,7 +26,7 @@ export class TaskSection extends LitElement {
       font-weight: 600;
       margin-bottom: 0.5rem;
       padding-left: 0.25rem;
-      color: var(--text-color);
+      color: var(--section-title-color);
     }
 
     .task-list {
@@ -39,18 +34,26 @@ export class TaskSection extends LitElement {
       flex-direction: column;
       gap: 0.75rem;
     }
-    .title {
-      color: var(--section-title-color);
-    }
-
   `;
+
+  // 🔄 Captura el evento y vuelve a emitirlo hacia arriba
+  private _onEditRequest(e: CustomEvent) {
+    e.stopPropagation(); // evita que se dispare varias veces
+    this.dispatchEvent(new CustomEvent('edit-task-request', {
+      detail: e.detail,
+      bubbles: true,
+      composed: true
+    }));
+  }
 
   render() {
     return html`
       <div class="section">
         <div class="title">${this.title}</div>
         <div class="task-list">
-          ${this.tasks.map(task => html`<task-item .task=${task}></task-item>`)}
+          ${this.tasks.map(task => html`
+            <task-item .task=${task} @edit-task-request=${this._onEditRequest}></task-item>
+          `)}
         </div>
       </div>
     `;

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ESPE Tasks</title>
     <link rel="icon" href="/favicon.ico" />
+    <script type="module" src="/src/app.ts"></script>
     <style>
       body {
         margin: 0;
@@ -43,10 +44,42 @@
       <task-view></task-view>
       <div class="container-btn">
         <add-task-button></add-task-button>
-        <add-task-modal></add-task-modal>
+        <add-task-modal id="modal"></add-task-modal>
       </div>
     </main>
 
-    <script type="module" src="/src/app.ts"></script>
+
+    <script defer>
+      document.addEventListener('open-modal', () => {
+        const modal = document.getElementById('modal');
+        if (modal) modal.setAttribute('open', '');
+      });
+
+      document.addEventListener('new-task', (event) => {
+        const taskView = document.querySelector('task-view');
+        if (!taskView) return;
+
+        const { name, time, priority, notes } = event.detail;
+        const now = new Date();
+        const timeParts = time.split(':');
+
+        const formattedTime = now.toLocaleTimeString('es-EC', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        });
+
+        const task = {
+          id: crypto.randomUUID(),
+          name,
+          time: `Hoy · ${formattedTime}`,
+          date: now.toISOString().split('T')[0]
+        };
+
+        // Actualiza la propiedad tasks
+        taskView.tasks = [...taskView.tasks, task];
+      });
+    </script>
+
   </body>
 </html>

@@ -7,15 +7,31 @@ export class NavMenu extends LitElement {
     .menu {
       display: flex;
       gap: 1.5rem;
+      flex-direction: row;
     }
+
     .menu-item {
       color: white;
       cursor: pointer;
       font-size: 0.95rem;
       transition: opacity 0.2s;
     }
+
     .menu-item:hover {
       opacity: 0.7;
+    }
+
+    /* Adaptación automática si el nav-menu tiene clase column (lo puedes añadir desde el sidebar) */
+    :host(.column) .menu {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 768px) {
+      :host-context(sidebar-menu) .menu {
+        flex-direction: column;
+        gap: 1rem;
+      }
     }
   `;
 

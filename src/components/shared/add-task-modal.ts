@@ -4,6 +4,8 @@ import { customElement, property, query } from 'lit/decorators.js';
 @customElement('add-task-modal')
 export class AddTaskModal extends LitElement {
   @property({ type: Boolean, reflect: true }) open = false;
+  @property({ type: Boolean }) editing = false;
+  @property({ type: String }) editingId = '';
 
   @query('#task-name') nameInput!: HTMLInputElement;
   @query('#task-time') timeInput!: HTMLInputElement;
@@ -25,6 +27,10 @@ export class AddTaskModal extends LitElement {
       display: flex;
     }
 
+    .backdrop {
+      width: 500px;
+    }
+
     .modal-content {
       background-color: #10231c;
       border-radius: 12px;
@@ -33,6 +39,7 @@ export class AddTaskModal extends LitElement {
       padding-bottom: 1.5rem;
       box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
       color: white;
+      position: relative;
     }
 
     h2 {
@@ -95,23 +102,75 @@ export class AddTaskModal extends LitElement {
     }
   `;
 
+  connectedCallback() {
+    super.connectedCallback();
+    window.addEventListener('keydown', this._handleEscape);
+  }
+
+  disconnectedCallback() {
+    window.removeEventListener('keydown', this._handleEscape);
+    super.disconnectedCallback();
+  }
+
+  /**
+   * Este método se llama para abrir el modal en modo edición.
+   * Los valores del formulario se rellenan automáticamente.
+   */
+  public openForEdit(task: { id: string; name: string; time: string; priority: string; notes: string }) {
+    this.editing = true;
+    this.editingId = task.id;
+    this.open = true;
+
+    setTimeout(() => {
+      this.nameInput.value = task.name;
+      this.timeInput.value = this._parseTo24Hour(task.time); // ✅ solo esta
+      this.prioritySelect.value = task.priority;
+      this.notesInput.value = task.notes;
+    }, 0);
+  }
+
+
+  private _parseTo24Hour(timeStr: string): string {
+    try {
+      const match = timeStr.match(/·\s*([\d:]+)\s*(AM|PM)/i);
+      if (!match) return '10:00'; // fallback
+
+      let [hour, minute] = match[1].split(':').map(Number);
+      const ampm = match[2].toUpperCase();
+
+      if (ampm === 'PM' && hour < 12) hour += 12;
+      if (ampm === 'AM' && hour === 12) hour = 0;
+
+      return `${hour.toString().padStart(2, '0')}:${minute
+        .toString()
+        .padStart(2, '0')}`;
+    } catch {
+      return '10:00';
+    }
+  }
+
+
   render() {
     return html`
-      <div class="modal-content">
-        <div class="close" @click=${this._close}>&times;</div>
-        <h2>Nueva tarea</h2>
-        <div class="form-group">
-          <input id="task-name" placeholder="Nombre de la tarea" />
-          <textarea id="task-notes" placeholder="Notas"></textarea>
-          <input id="task-time" type="time" value="10:00" />
-          <select id="task-priority">
-            <option value="Alta">Alta</option>
-            <option value="Media" selected>Media</option>
-            <option value="Baja">Baja</option>
-          </select>
-        </div>
-        <div class="actions">
-          <button @click=${this._submit}>Agregar</button>
+      <div class="backdrop" @click=${this._onBackdropClick}>
+        <div class="modal-content" @click=${this._stopPropagation}>
+          <div class="close" @click=${this._close}>&times;</div>
+          <h2>${this.editing ? 'Editar tarea' : 'Nueva tarea'}</h2>
+          <div class="form-group">
+            <input id="task-name" placeholder="Nombre de la tarea" />
+            <textarea id="task-notes" placeholder="Notas"></textarea>
+            <input id="task-time" type="time" value="10:00" />
+            <select id="task-priority">
+              <option value="Alta">Alta</option>
+              <option value="Media" selected>Media</option>
+              <option value="Baja">Baja</option>
+            </select>
+          </div>
+          <div class="actions">
+            <button @click=${this._submit}>
+              ${this.editing ? 'Guardar cambios' : 'Agregar'}
+            </button>
+          </div>
         </div>
       </div>
     `;
@@ -119,7 +178,27 @@ export class AddTaskModal extends LitElement {
 
   private _close() {
     this.open = false;
+    this.editing = false;
+    this.editingId = '';
+    this.nameInput.value = '';
+    this.timeInput.value = '10:00';
+    this.notesInput.value = '';
+    this.prioritySelect.value = 'Media';
   }
+
+  private _onBackdropClick() {
+    this._close();
+  }
+
+  private _stopPropagation(e: Event) {
+    e.stopPropagation();
+  }
+
+  private _handleEscape = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      this._close();
+    }
+  };
 
   private _submit() {
     const name = this.nameInput?.value.trim();
@@ -127,13 +206,22 @@ export class AddTaskModal extends LitElement {
     const priority = this.prioritySelect?.value;
     const notes = this.notesInput?.value.trim();
 
-    if (name) {
-      this.dispatchEvent(new CustomEvent('new-task', {
-        detail: { name, time, priority, notes },
-        bubbles: true,
-        composed: true
-      }));
-      this._close();
-    }
+    if (!name) return;
+
+    const eventName = this.editing ? 'edit-task' : 'new-task';
+
+    this.dispatchEvent(new CustomEvent(eventName, {
+      detail: {
+        id: this.editingId,
+        name,
+        time,
+        priority,
+        notes
+      },
+      bubbles: true,
+      composed: true
+    }));
+
+    this._close();
   }
 }
